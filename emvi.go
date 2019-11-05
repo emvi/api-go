@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 )
 
 const (
@@ -110,6 +111,31 @@ func (client *Client) refreshToken() error {
 	return nil
 }
 
+// FindArticles finds articles for given query and filter and returns the articles and the total number of results.
+func (client *Client) FindArticles(query string, filter *ArticleFilter) ([]Article, int, error) {
+	if filter == nil {
+		filter = &ArticleFilter{}
+	}
+
+	u, err := client.buildURL(client.ApiHost+searchArticlesEndpoint, query, filter)
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	result := struct {
+		Articles []Article `json:"articles"`
+		Count    int       `json:"count"`
+	}{}
+
+	if err := client.performGet(u, &result); err != nil {
+		return nil, 0, err
+	}
+
+	return result.Articles, result.Count, nil
+}
+
+// GetOrganization returns the organization for this client.
 func (client *Client) GetOrganization() (*Organization, error) {
 	result := new(Organization)
 
@@ -118,6 +144,27 @@ func (client *Client) GetOrganization() (*Organization, error) {
 	}
 
 	return result, nil
+}
+
+func (client *Client) buildURL(path, query string, filter Filter) (string, error) {
+	u, err := url.Parse(path)
+
+	if err != nil {
+		return "", err
+	}
+
+	q := u.Query()
+
+	if query != "" {
+		q.Add("query", query)
+	}
+
+	if filter != nil {
+		filter.addParams(&q)
+	}
+
+	u.RawQuery = q.Encode()
+	return u.String(), nil
 }
 
 func (client *Client) performGet(url string, respObj interface{}) error {

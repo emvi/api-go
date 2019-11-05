@@ -28,6 +28,19 @@ func TestNewClientRefreshToken(t *testing.T) {
 	}
 }
 
+func TestClient_FindArticles(t *testing.T) {
+	client := getTestClient()
+	articles, count, err := client.FindArticles("test", nil)
+
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if len(articles) != 1 || count != 1 {
+		t.Fatalf("Result not as expected: %v %v", len(articles), count)
+	}
+}
+
 func TestClient_GetOrganization(t *testing.T) {
 	client := getTestClient()
 	result, err := client.GetOrganization()
