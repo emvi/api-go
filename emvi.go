@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"time"
 )
 
 const (
@@ -40,7 +39,7 @@ type Client struct {
 	ApiHost      string
 	TokenType    string
 	AccessToken  string
-	ExpiresIn    time.Time
+	ExpiresIn    int // TTL in seconds
 }
 
 // Config is used for advanced client configuration.
@@ -93,9 +92,9 @@ func (client *Client) refreshToken() error {
 	}
 
 	respJson := struct {
-		TokenType   string        `json:"token_type"`
-		AccessToken string        `json:"access_token"`
-		ExpiresIn   time.Duration `json:"expires_in"` // TTL in seconds
+		TokenType   string `json:"token_type"`
+		AccessToken string `json:"access_token"`
+		ExpiresIn   int    `json:"expires_in"`
 	}{}
 
 	decoder := json.NewDecoder(resp.Body)
@@ -106,7 +105,7 @@ func (client *Client) refreshToken() error {
 
 	client.TokenType = respJson.TokenType
 	client.AccessToken = respJson.AccessToken
-	client.ExpiresIn = time.Now().Add(time.Second * respJson.ExpiresIn)
+	client.ExpiresIn = respJson.ExpiresIn
 
 	return nil
 }

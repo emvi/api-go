@@ -2,7 +2,6 @@ package emvi
 
 import (
 	"testing"
-	"time"
 )
 
 const (
@@ -24,7 +23,7 @@ func TestNewClientRefreshToken(t *testing.T) {
 
 	if client.TokenType != "Bearer" ||
 		client.AccessToken == "" ||
-		client.ExpiresIn.Before(time.Now().Add(time.Second)) {
+		client.ExpiresIn == 0 {
 		t.Fatalf("Client data not as expected: %v", client)
 	}
 }
