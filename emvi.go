@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
 )
 
 const (
@@ -21,7 +22,7 @@ const (
 	searchTagsEndpoint     = "/api/v1/search/tag"
 	searchAllEndpoint      = "/api/v1/search"
 	organizationEndpoint   = "/api/v1/organization"
-	articleEndpoint        = "/api/v1/article/{id}"
+	articleEndpoint        = "/api/v1/article/"
 	articleHistoryEndpoint = "/api/v1/article/{id}/history"
 	languagesEndpoint      = "/api/v1/lang"
 	languageEndpoint       = "/api/v1/lang/{id}"
@@ -117,7 +118,7 @@ func (client *Client) FindArticles(query string, filter *ArticleFilter) ([]Artic
 		filter = &ArticleFilter{}
 	}
 
-	u, err := client.buildURL(client.ApiHost+searchArticlesEndpoint, query, filter)
+	u, err := client.buildURL(client.ApiHost+searchArticlesEndpoint, query, filter, nil)
 
 	if err != nil {
 		return nil, 0, err
@@ -135,7 +136,7 @@ func (client *Client) FindArticles(query string, filter *ArticleFilter) ([]Artic
 	return result.Articles, result.Count, nil
 }
 
-// GetOrganization returns the organization for this client.
+// GetOrganization returns the organization.
 func (client *Client) GetOrganization() (*Organization, error) {
 	result := new(Organization)
 
@@ -146,7 +147,50 @@ func (client *Client) GetOrganization() (*Organization, error) {
 	return result, nil
 }
 
-func (client *Client) buildURL(path, query string, filter Filter) (string, error) {
+// GetArticle returns an article, its content and authors for given ID, language ID and version.
+// Use version 0 if you want to read the latest version.
+// The language ID and version are optional.
+func (client *Client) GetArticle(id, langId string, version int) (*Article, *ArticleContent, []User, error) {
+	versionStr := ""
+
+	if version > 0 {
+		versionStr = strconv.Itoa(version)
+	}
+
+	u, err := client.buildURL(client.ApiHost+articleEndpoint+id, "", nil, map[string]string{
+		"lang_id": langId,
+		"version": versionStr,
+	})
+
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	result := struct {
+		Article *Article        `json:"article"`
+		Content *ArticleContent `json:"content"`
+		Authors []User          `json:"authors"`
+	}{}
+
+	if err := client.performGet(u, &result); err != nil {
+		return nil, nil, nil, err
+	}
+
+	return result.Article, result.Content, result.Authors, nil
+}
+
+// GetLanguages returns all languages for the organization.
+func (client *Client) GetLanguages() ([]Language, error) {
+	var result []Language
+
+	if err := client.performGet(client.ApiHost+languagesEndpoint, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (client *Client) buildURL(path, query string, filter Filter, params map[string]string) (string, error) {
 	u, err := url.Parse(path)
 
 	if err != nil {
@@ -161,6 +205,14 @@ func (client *Client) buildURL(path, query string, filter Filter) (string, error
 
 	if filter != nil {
 		filter.addParams(&q)
+	}
+
+	if params != nil {
+		for key, value := range params {
+			if value != "" {
+				q.Add(key, value)
+			}
+		}
 	}
 
 	u.RawQuery = q.Encode()

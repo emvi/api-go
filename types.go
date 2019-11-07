@@ -77,3 +77,11 @@ type Organization struct {
 	MemberCount      int    `json:"member_count"`
 	ArticleCount     int    `json:"article_count"`
 }
+
+type Language struct {
+	BaseEntity
+	OrganizationId string `json:"organization_id"`
+	Name           string `json:"name"`
+	Code           string `json:"code"`
+	Default        bool   `json:"default"`
+}
