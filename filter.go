@@ -45,6 +45,7 @@ func (filter *BaseSearch) addParams(query *url.Values) {
 type ArticleFilter struct {
 	BaseSearch
 
+	LanguageId       string        `json:"language_id"`
 	Archived         bool          `json:"archived"`
 	WIP              bool          `json:"wip"`
 	ClientAccess     bool          `json:"client_access"`
@@ -65,6 +66,7 @@ type ArticleFilter struct {
 
 func (filter *ArticleFilter) addParams(query *url.Values) {
 	filter.BaseSearch.addParams(query)
+	addParamIfNotEmpty(query, "language_id", filter.LanguageId)
 	addParamIfNotEmpty(query, "archived", boolToString(filter.Archived))
 	addParamIfNotEmpty(query, "wip", boolToString(filter.WIP))
 	addParamIfNotEmpty(query, "client_access", boolToString(filter.ClientAccess))
