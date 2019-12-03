@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"sync"
 )
 
 const (
@@ -42,6 +43,7 @@ type Client struct {
 	TokenType    string
 	AccessToken  string
 	ExpiresIn    int // TTL in seconds
+	m            sync.Mutex
 }
 
 // Config is used for advanced client configuration.
@@ -105,6 +107,8 @@ func (client *Client) refreshToken() error {
 		return err
 	}
 
+	client.m.Lock()
+	defer client.m.Unlock()
 	client.TokenType = respJson.TokenType
 	client.AccessToken = respJson.AccessToken
 	client.ExpiresIn = respJson.ExpiresIn

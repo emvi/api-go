@@ -6,8 +6,8 @@ import (
 
 const (
 	// this is our API test organization
-	testClientId     = "n0QizLaKCH1RoBB3sYWK"
-	testClientSecret = "P5S7cjSFw2QDTjLffzOHMrCnFkOhmAJ6fQPzW2JLP2C18RWKlOysOdYNK1mTr3WD"
+	testClientId     = "HEuxz77eec6xat5xD0Xj"
+	testClientSecret = "MNYy5v9TI7sUUUm6Abi2ortxT28bB26gxIMbfBd8hcTXYfKO7AThrcdr2YBBjAa1"
 	testClientOrga   = "api-test"
 )
 
@@ -59,13 +59,13 @@ func TestClient_GetOrganization(t *testing.T) {
 
 func TestClient_GetArticle(t *testing.T) {
 	client := getTestClient()
-	article, content, authors, err := client.GetArticle("z0odQAGdLO", "lMK14kgOv8", 0)
+	article, content, authors, err := client.GetArticle("beJarvjaQM", "JxGdjWaOz9", 0)
 
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if article.Id != "z0odQAGdLO" || content == nil || len(authors) != 1 {
+	if article.Id != "beJarvjaQM" || content == nil || len(authors) != 1 {
 		t.Fatalf("Result not as expected: %v %v %v", article, content, authors)
 	}
 }
