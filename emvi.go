@@ -162,7 +162,7 @@ func (client *Client) GetArticle(id, langId string, version int) (*Article, *Art
 	}
 
 	u, err := client.buildURL(client.ApiHost+articleEndpoint+id, "", nil, map[string]string{
-		"lang_id": langId,
+		"lang": langId,
 		"version": versionStr,
 	})
 
